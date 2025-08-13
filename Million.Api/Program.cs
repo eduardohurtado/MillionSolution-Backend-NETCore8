@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Million.Api.Tests")]
 var builder = WebApplication.CreateBuilder(args);
 
 // configure MongoDb settings
