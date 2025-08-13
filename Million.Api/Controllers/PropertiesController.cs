@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Million.Api.Controllers;
-
 [ApiController]
 [Route("api/[controller]")]
 public class PropertiesController : ControllerBase
@@ -14,40 +12,40 @@ public class PropertiesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(
-        [FromQuery] string? name,
-        [FromQuery] string? address,
-        [FromQuery] decimal? minPrice,
-        [FromQuery] decimal? maxPrice,
-        [FromQuery] int skip = 0,
-        [FromQuery] int limit = 50)
+    public async Task<IActionResult> GetAll()
     {
-        var filter = new PropertyFilterDto
-        {
-            Name = name,
-            Address = address,
-            MinPrice = minPrice,
-            MaxPrice = maxPrice,
-            Skip = skip,
-            Limit = Math.Min(limit, 200)
-        };
-
-        var result = await _service.GetAsync(filter);
-        return Ok(result);
+        var properties = await _service.GetAllAsync();
+        return Ok(properties);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
     {
-        var prop = await _service.GetByIdAsync(id);
-        if (prop == null) return NotFound();
-        return Ok(prop);
+        var property = await _service.GetByIdAsync(id);
+        if (property == null) return NotFound();
+        return Ok(property);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] PropertyDto dto)
     {
-        var created = await _service.AddAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        await _service.AddAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] PropertyDto dto)
+    {
+        var updated = await _service.UpdateAsync(id, dto);
+        if (!updated) return NotFound();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var deleted = await _service.DeleteAsync(id);
+        if (!deleted) return NotFound();
+        return NoContent();
     }
 }

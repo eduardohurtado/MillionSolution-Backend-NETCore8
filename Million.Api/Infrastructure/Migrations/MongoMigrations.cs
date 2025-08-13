@@ -8,44 +8,7 @@ public class MongoMigrations
 
     public async Task RunMigrationsAsync()
     {
-        // Properties collection
-        var properties = _context.Properties;
-        var indexKeys = Builders<Property>.IndexKeys;
-        await properties.Indexes.CreateManyAsync(new[]
-        {
-            new CreateIndexModel<Property>(indexKeys.Ascending(p => p.Name)),
-            new CreateIndexModel<Property>(indexKeys.Ascending(p => p.Address)),
-            new CreateIndexModel<Property>(indexKeys.Ascending(p => p.Price)),
-            new CreateIndexModel<Property>(indexKeys.Ascending(p => p.IdOwner))
-        });
-
-        // 2) Seed sample data if empty
-        var count = await properties.CountDocumentsAsync(FilterDefinition<Property>.Empty);
-        if (count == 0)
-        {
-            var seed = new[]
-            {
-                new Property{ IdOwner="owner1", Name="Sunny Apartment", Address="Calle 1 #23-45", Price=150000, ImageUrl="https://..." },
-                new Property{ IdOwner="owner2", Name="Cozy House", Address="Carrera 5 #12-34", Price=250000, ImageUrl="https://..." },
-                new Property{ IdOwner="owner1", Name="Penthouse", Address="Av Siempre Viva", Price=750000, ImageUrl="https://..." }
-            };
-            await properties.InsertManyAsync(seed);
-        }
-
-        // 3) Build graphics/aggregations
-        // Example: price distribution buckets
-        var pipeline = new BsonDocument[]
-        {
-            new BsonDocument("$bucket", new BsonDocument {
-                { "groupBy", "$Price" },
-                { "boundaries", new BsonArray { 0, 100000, 200000, 500000, 1000000 } },
-                { "default", "Other" },
-                { "output", new BsonDocument { { "count", new BsonDocument("$sum", 1) } } }
-            })
-        };
-        var agg = await properties.Aggregate<BsonDocument>(pipeline).ToListAsync();
-
-        // Owners collection
+        // Seed Owners collection
         var owners = _context.Owners;
         var ownersCount = await owners.CountDocumentsAsync(FilterDefinition<Owner>.Empty);
         if (ownersCount == 0)
@@ -58,18 +21,24 @@ public class MongoMigrations
             await owners.InsertManyAsync(seedOwners);
         }
 
-        var graphics = _context.Graphics;
-        var priceDistribution = new Graphic
-        {
-            Key = "price_distribution",
-            Data = new BsonDocument { { "buckets", new BsonArray(agg) } },
-            CreatedAt = DateTime.UtcNow
-        };
+        // Seed Properties collection
+        var ownersList = await _context.Owners.Find(FilterDefinition<Owner>.Empty).ToListAsync();
 
-        // upsert the graphic
-        await graphics.ReplaceOneAsync(
-            Builders<Graphic>.Filter.Eq(g => g.Key, priceDistribution.Key),
-            priceDistribution,
-            new ReplaceOptions { IsUpsert = true });
+        if (ownersList != null && ownersList.Count > 1 && await _context.Properties.CountDocumentsAsync(FilterDefinition<Property>.Empty) == 0)
+        {
+            var seedProps = new List<Property>();
+            if (ownersList[0].Id != null)
+            {
+                seedProps.Add(new Property { Name = "Green Villa", Address = "123 Forest Rd", Price = 250000, CodeInternal = "P001", Year = 2010, IdOwner = ownersList[0].Id! });
+            }
+            if (ownersList[1].Id != null)
+            {
+                seedProps.Add(new Property { Name = "Ocean View", Address = "456 Beach Ave", Price = 500000, CodeInternal = "P002", Year = 2015, IdOwner = ownersList[1].Id! });
+            }
+            if (seedProps.Count > 0)
+            {
+                await _context.Properties.InsertManyAsync(seedProps);
+            }
+        }
     }
 }

@@ -7,9 +7,13 @@ public class Property
     [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
 
-    public string IdOwner { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string Address { get; set; } = null!;
     public decimal Price { get; set; }
-    public string ImageUrl { get; set; } = null!; // "just one image" per test
+    public string CodeInternal { get; set; } = null!;
+    public int Year { get; set; }
+
+    // FK to Owner
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string IdOwner { get; set; } = null!;
 }
