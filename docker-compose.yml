@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mongo_db
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: million_db
+    volumes:
+      - mongo_data:/data/db
+
+  million_api:
+    build:
+      context: .
+      dockerfile: Million.Api/Dockerfile
+    container_name: million_api
+    depends_on:
+      - mongodb
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      MongoDbSettings__ConnectionString: "mongodb://mongodb:27017"
+      MongoDbSettings__DatabaseName: "million_db"
+
+volumes:
+  mongo_data:
