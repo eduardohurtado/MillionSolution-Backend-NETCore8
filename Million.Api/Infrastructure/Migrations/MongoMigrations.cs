@@ -1,10 +1,8 @@
 using MongoDB.Driver;
-using MongoDB.Bson;
 
-public class MongoMigrations
+public class MongoMigrations(MongoContext context)
 {
-    private readonly MongoContext _context;
-    public MongoMigrations(MongoContext context) => _context = context;
+    private readonly MongoContext _context = context;
 
     public async Task RunMigrationsAsync()
     {
@@ -50,10 +48,26 @@ public class MongoMigrations
             {
                 var seedImages = new List<PropertyImage>
             {
-                new PropertyImage { IdProperty = propertiesList[0].Id!, File = "https://example.com/green-villa.jpg", Enabled = true },
-                new PropertyImage { IdProperty = propertiesList[1].Id!, File = "https://example.com/ocean-view.jpg", Enabled = true }
+                new() { IdProperty = propertiesList[0].Id!, File = "https://example.com/green-villa.jpg", Enabled = true },
+                new() { IdProperty = propertiesList[1].Id!, File = "https://example.com/ocean-view.jpg", Enabled = true }
             };
                 await _context.PropertyImages.InsertManyAsync(seedImages);
+            }
+        }
+
+        // Seed PropertyTraces collection
+        if (await _context.PropertyTraces.CountDocumentsAsync(FilterDefinition<PropertyTrace>.Empty) == 0)
+        {
+            var propertiesList = await _context.Properties.Find(FilterDefinition<Property>.Empty).ToListAsync();
+
+            if (propertiesList.Count > 0)
+            {
+                var seedPropertyTraces = new List<PropertyTrace>
+            {
+                new() { IdProperty = propertiesList[0].Id!, DateSale = new DateTime(1985, 5, 15), Name = "Eduardo Hurtado", Value = 1299.99m, Tax = 299.99m },
+                new() { IdProperty = propertiesList[1].Id!, DateSale = new DateTime(1993, 5, 15), Name = "Miguel Hurtado", Value = 7599.99m, Tax = 599.99m  }
+            };
+                await _context.PropertyTraces.InsertManyAsync(seedPropertyTraces);
             }
         }
 
@@ -66,5 +80,10 @@ public class MongoMigrations
         var imageIndexKeys = Builders<PropertyImage>.IndexKeys.Ascending(img => img.IdProperty);
         var imageIndexModel = new CreateIndexModel<PropertyImage>(imageIndexKeys);
         await _context.PropertyImages.Indexes.CreateOneAsync(imageIndexModel);
+
+        // Ensure index on PropertyTraces.IdProperty
+        var ptraceIndexKeys = Builders<PropertyTrace>.IndexKeys.Ascending(p => p.IdProperty);
+        var ptraceIndexModel = new CreateIndexModel<PropertyTrace>(ptraceIndexKeys);
+        await _context.PropertyTraces.Indexes.CreateOneAsync(ptraceIndexModel);
     }
 }

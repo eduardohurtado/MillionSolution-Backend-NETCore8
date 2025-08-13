@@ -1,0 +1,16 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+public class PropertyTraceDto
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
+    public DateTime DateSale { get; set; }
+    public string Name { get; set; } = null!;
+    public decimal Value { get; set; }
+    public decimal Tax { get; set; }
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string IdProperty { get; set; } = null!;
+}

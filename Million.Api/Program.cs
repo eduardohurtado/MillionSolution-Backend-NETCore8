@@ -11,6 +11,8 @@ builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 builder.Services.AddScoped<OwnerService>();
 builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
 builder.Services.AddScoped<PropertyImageService>();
+builder.Services.AddScoped<IPropertyTraceRepository, PropertyTraceRepository>();
+builder.Services.AddScoped<PropertyTraceService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

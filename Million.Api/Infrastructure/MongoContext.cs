@@ -15,4 +15,6 @@ public class MongoContext
     public IMongoCollection<Owner> Owners => Database.GetCollection<Owner>("owners");
     public IMongoCollection<PropertyImage> PropertyImages
         => Database.GetCollection<PropertyImage>("PropertyImages");
+    public IMongoCollection<PropertyTrace> PropertyTraces
+        => Database.GetCollection<PropertyTrace>("PropertyTraces");
 }
