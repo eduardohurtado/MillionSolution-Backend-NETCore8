@@ -12,6 +12,7 @@ public class MongoContext
     }
 
     public IMongoCollection<Property> Properties => Database.GetCollection<Property>("properties");
-    public IMongoCollection<Graphic> Graphics => Database.GetCollection<Graphic>("graphics");
     public IMongoCollection<Owner> Owners => Database.GetCollection<Owner>("owners");
+    public IMongoCollection<PropertyImage> PropertyImages
+        => Database.GetCollection<PropertyImage>("PropertyImages");
 }

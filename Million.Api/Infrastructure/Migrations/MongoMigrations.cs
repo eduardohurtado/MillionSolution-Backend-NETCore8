@@ -40,5 +40,26 @@ public class MongoMigrations
                 await _context.Properties.InsertManyAsync(seedProps);
             }
         }
+
+        // Ensure index on Properties.IdOwner
+        var propertyIndexKeys = Builders<Property>.IndexKeys.Ascending(p => p.IdOwner);
+        var propertyIndexModel = new CreateIndexModel<Property>(propertyIndexKeys);
+        await _context.Properties.Indexes.CreateOneAsync(propertyIndexModel);
+
+        // Seed PropertyImages collection
+        if (await _context.PropertyImages.CountDocumentsAsync(FilterDefinition<PropertyImage>.Empty) == 0)
+        {
+            var propertiesList = await _context.Properties.Find(FilterDefinition<Property>.Empty).ToListAsync();
+
+            if (propertiesList.Count > 0)
+            {
+                var seedImages = new List<PropertyImage>
+            {
+                new PropertyImage { IdProperty = propertiesList[0].Id!, File = "https://example.com/green-villa.jpg", Enabled = true },
+                new PropertyImage { IdProperty = propertiesList[1].Id!, File = "https://example.com/ocean-view.jpg", Enabled = true }
+            };
+                await _context.PropertyImages.InsertManyAsync(seedImages);
+            }
+        }
     }
 }
