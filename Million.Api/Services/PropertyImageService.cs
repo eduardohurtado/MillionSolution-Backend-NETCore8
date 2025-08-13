@@ -18,4 +18,8 @@ public class PropertyImageService
 
     public Task<bool> DeleteAsync(string id, CancellationToken ct = default)
         => _repo.DeleteAsync(id, ct);
+
+    public Task<IEnumerable<PropertyImageDto>> GetByPropertyIdAsync(string propertyId, CancellationToken ct = default)
+        => _repo.GetByPropertyIdAsync(propertyId, ct);
+
 }

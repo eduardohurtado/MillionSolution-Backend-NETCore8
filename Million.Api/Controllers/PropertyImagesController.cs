@@ -60,4 +60,11 @@ public class PropertyImagesController : ControllerBase
         if (!deleted) return NotFound();
         return NoContent();
     }
+
+    [HttpGet("property/{propertyId}")]
+    public async Task<IActionResult> GetByPropertyId(string propertyId)
+    {
+        var images = await _service.GetByPropertyIdAsync(propertyId);
+        return Ok(images);
+    }
 }

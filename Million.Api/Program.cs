@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Million.Api.Tests")]
 var builder = WebApplication.CreateBuilder(args);
 
 // configure MongoDb settings
@@ -11,6 +14,8 @@ builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 builder.Services.AddScoped<OwnerService>();
 builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
 builder.Services.AddScoped<PropertyImageService>();
+builder.Services.AddScoped<IPropertyTraceRepository, PropertyTraceRepository>();
+builder.Services.AddScoped<PropertyTraceService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -26,6 +31,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Middlewares
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapControllers();
 app.UseHttpsRedirection();

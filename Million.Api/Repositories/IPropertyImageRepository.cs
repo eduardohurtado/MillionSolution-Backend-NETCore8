@@ -5,4 +5,6 @@ public interface IPropertyImageRepository
     Task AddAsync(PropertyImage image, CancellationToken ct = default);
     Task<bool> UpdateAsync(string id, PropertyImage image, CancellationToken ct = default);
     Task<bool> DeleteAsync(string id, CancellationToken ct = default);
+    Task<IEnumerable<PropertyImageDto>> GetByPropertyIdAsync(string propertyId, CancellationToken ct = default);
+
 }
