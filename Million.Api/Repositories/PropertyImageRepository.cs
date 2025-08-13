@@ -46,4 +46,17 @@ public class PropertyImageRepository : IPropertyImageRepository
         var result = await _context.PropertyImages.DeleteOneAsync(i => i.Id == id, ct);
         return result.DeletedCount > 0;
     }
+
+    public async Task<IEnumerable<PropertyImageDto>> GetByPropertyIdAsync(string propertyId, CancellationToken ct = default)
+    {
+        var filter = Builders<PropertyImage>.Filter.Eq(img => img.IdProperty, propertyId);
+        return await _context.PropertyImages.Find(filter)
+            .Project<PropertyImageDto>(Builders<PropertyImage>.Projection
+                .Include(i => i.Id)
+                .Include(i => i.IdProperty)
+                .Include(i => i.File)
+                .Include(i => i.Enabled))
+            .ToListAsync(ct);
+    }
+
 }

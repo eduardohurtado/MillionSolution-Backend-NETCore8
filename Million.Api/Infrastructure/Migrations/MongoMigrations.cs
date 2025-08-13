@@ -41,11 +41,6 @@ public class MongoMigrations
             }
         }
 
-        // Ensure index on Properties.IdOwner
-        var propertyIndexKeys = Builders<Property>.IndexKeys.Ascending(p => p.IdOwner);
-        var propertyIndexModel = new CreateIndexModel<Property>(propertyIndexKeys);
-        await _context.Properties.Indexes.CreateOneAsync(propertyIndexModel);
-
         // Seed PropertyImages collection
         if (await _context.PropertyImages.CountDocumentsAsync(FilterDefinition<PropertyImage>.Empty) == 0)
         {
@@ -61,5 +56,15 @@ public class MongoMigrations
                 await _context.PropertyImages.InsertManyAsync(seedImages);
             }
         }
+
+        // Ensure index on Properties.IdOwner
+        var propertyIndexKeys = Builders<Property>.IndexKeys.Ascending(p => p.IdOwner);
+        var propertyIndexModel = new CreateIndexModel<Property>(propertyIndexKeys);
+        await _context.Properties.Indexes.CreateOneAsync(propertyIndexModel);
+
+        // Ensure index on PropertyImages.IdProperty
+        var imageIndexKeys = Builders<PropertyImage>.IndexKeys.Ascending(img => img.IdProperty);
+        var imageIndexModel = new CreateIndexModel<PropertyImage>(imageIndexKeys);
+        await _context.PropertyImages.Indexes.CreateOneAsync(imageIndexModel);
     }
 }
