@@ -1,4 +1,5 @@
 using MongoDB.Driver;
+using MongoDB.Bson;
 
 public class PropertyRepository : IPropertyRepository
 {
@@ -55,4 +56,51 @@ public class PropertyRepository : IPropertyRepository
         var result = await _context.Properties.DeleteOneAsync(p => p.Id == id, ct);
         return result.DeletedCount > 0;
     }
+
+    public async Task<IEnumerable<PropertyWithOwnerDto>> GetAllWithOwnersAsync(CancellationToken ct = default)
+    {
+        var pipeline = _context.Properties.Aggregate()
+            .Lookup(
+                foreignCollection: _context.Owners,
+                localField: p => p.IdOwner,
+                foreignField: o => o.Id,
+                @as: (PropertyWithOwnerDto p) => p.Owner
+            );
+
+        // Because MongoDB.Driver's strongly typed Lookup is limited, 
+        // we’ll switch to BsonDocument mapping for simplicity:
+        var results = await _context.Properties.Aggregate()
+            .Lookup("owners", "IdOwner", "_id", "Owner")
+            .As<BsonDocument>()
+            .ToListAsync(ct);
+
+        var mapped = results.Select(doc =>
+        {
+            var ownerArray = doc["Owner"].AsBsonArray;
+            var ownerDoc = ownerArray.FirstOrDefault()?.AsBsonDocument;
+
+            return new PropertyWithOwnerDto
+            {
+                Id = doc["_id"].ToString(),
+                Name = doc["Name"].AsString,
+                Address = doc["Address"].AsString,
+                Price = doc["Price"].ToDecimal(),
+                CodeInternal = doc["CodeInternal"].AsString,
+                Year = doc["Year"].ToInt32(),
+                Owner = ownerDoc != null
+                    ? new OwnerDto
+                    {
+                        Id = ownerDoc["_id"].ToString(),
+                        Name = ownerDoc["Name"].AsString,
+                        Address = ownerDoc["Address"].AsString,
+                        Photo = ownerDoc["Photo"].AsString,
+                        Birthday = ownerDoc["Birthday"].ToUniversalTime()
+                    }
+                    : null!
+            };
+        });
+
+        return mapped;
+    }
+
 }

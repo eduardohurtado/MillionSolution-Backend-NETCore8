@@ -5,4 +5,5 @@ public interface IPropertyRepository
     Task AddAsync(Property property, CancellationToken ct = default);
     Task<bool> UpdateAsync(string id, Property property, CancellationToken ct = default);
     Task<bool> DeleteAsync(string id, CancellationToken ct = default);
+    Task<IEnumerable<PropertyWithOwnerDto>> GetAllWithOwnersAsync(CancellationToken ct = default);
 }

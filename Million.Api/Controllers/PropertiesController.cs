@@ -48,4 +48,11 @@ public class PropertiesController : ControllerBase
         if (!deleted) return NotFound();
         return NoContent();
     }
+
+    [HttpGet("with-owners")]
+    public async Task<IActionResult> GetAllWithOwners()
+    {
+        var properties = await _service.GetAllWithOwnersAsync();
+        return Ok(properties);
+    }
 }

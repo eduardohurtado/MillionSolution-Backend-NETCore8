@@ -40,5 +40,10 @@ public class MongoMigrations
                 await _context.Properties.InsertManyAsync(seedProps);
             }
         }
+
+        // Ensure index on Properties.IdOwner
+        var propertyIndexKeys = Builders<Property>.IndexKeys.Ascending(p => p.IdOwner);
+        var propertyIndexModel = new CreateIndexModel<Property>(propertyIndexKeys);
+        await _context.Properties.Indexes.CreateOneAsync(propertyIndexModel);
     }
 }
