@@ -17,6 +17,19 @@ builder.Services.AddScoped<PropertyImageService>();
 builder.Services.AddScoped<IPropertyTraceRepository, PropertyTraceRepository>();
 builder.Services.AddScoped<PropertyTraceService>();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy
+                .AllowAnyOrigin()   // You can restrict to specific domain: .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
@@ -38,10 +51,16 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.MapControllers();
 app.UseHttpsRedirection();
 
+// Use CORS policy
+app.UseCors("AllowFrontend");
+
 // run migrations at startup
 using (var scope = app.Services.CreateScope())
 {
-    var migrator = new MongoMigrations(scope.ServiceProvider.GetRequiredService<MongoContext>());
+    var migrator = new MongoMigrations(
+        scope.ServiceProvider.GetRequiredService<MongoContext>(),
+        scope.ServiceProvider.GetRequiredService<IHostEnvironment>()
+    );
     await migrator.RunMigrationsAsync();
 }
 
