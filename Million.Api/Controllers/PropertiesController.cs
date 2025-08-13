@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
+namespace Million.Api.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 public class PropertiesController : ControllerBase

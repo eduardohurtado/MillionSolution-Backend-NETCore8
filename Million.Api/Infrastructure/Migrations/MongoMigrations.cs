@@ -8,7 +8,7 @@ public class MongoMigrations
 
     public async Task RunMigrationsAsync()
     {
-        // 1) Create indexes
+        // Properties collection
         var properties = _context.Properties;
         var indexKeys = Builders<Property>.IndexKeys;
         await properties.Indexes.CreateManyAsync(new[]
@@ -44,6 +44,19 @@ public class MongoMigrations
             })
         };
         var agg = await properties.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
+        // Owners collection
+        var owners = _context.Owners;
+        var ownersCount = await owners.CountDocumentsAsync(FilterDefinition<Owner>.Empty);
+        if (ownersCount == 0)
+        {
+            var seedOwners = new[]
+            {
+                new Owner { Name = "John Doe", Address = "123 Main St", Photo = "https://example.com/john.jpg", Birthday = new DateTime(1985, 5, 15) },
+                new Owner { Name = "Jane Smith", Address = "456 Oak Ave", Photo = "https://example.com/jane.jpg", Birthday = new DateTime(1990, 8, 20) }
+            };
+            await owners.InsertManyAsync(seedOwners);
+        }
 
         var graphics = _context.Graphics;
         var priceDistribution = new Graphic
