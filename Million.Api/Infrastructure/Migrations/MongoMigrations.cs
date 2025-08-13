@@ -1,11 +1,21 @@
 using MongoDB.Driver;
 
-public class MongoMigrations(MongoContext context)
+public class MongoMigrations(MongoContext context, IHostEnvironment env)
 {
     private readonly MongoContext _context = context;
+    private readonly IHostEnvironment _env = env;
 
     public async Task RunMigrationsAsync()
     {
+        // Only clear DB in development
+        if (_env.IsDevelopment())
+        {
+            await _context.Properties.DeleteManyAsync(FilterDefinition<Property>.Empty);
+            await _context.Owners.DeleteManyAsync(FilterDefinition<Owner>.Empty);
+            await _context.PropertyImages.DeleteManyAsync(FilterDefinition<PropertyImage>.Empty);
+            await _context.PropertyTraces.DeleteManyAsync(FilterDefinition<PropertyTrace>.Empty);
+        }
+
         // Seed Owners collection
         var owners = _context.Owners;
         var ownersCount = await owners.CountDocumentsAsync(FilterDefinition<Owner>.Empty);
