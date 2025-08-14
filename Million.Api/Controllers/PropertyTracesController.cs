@@ -29,7 +29,7 @@ public class PropertyTracesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] PropertyTraceDto dto)
     {
-        await _service.AddAsync(dto);
+        var newPropertyTrace = await _service.AddAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
     }
 

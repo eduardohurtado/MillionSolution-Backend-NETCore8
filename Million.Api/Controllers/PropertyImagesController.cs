@@ -33,8 +33,8 @@ public class PropertyImagesController : ControllerBase
             Enabled = dto.Enabled
         };
 
-        await _service.AddAsync(entity);
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, entity);
+        var newPropertyImage = await _service.AddAsync(entity);
+        return CreatedAtAction(nameof(GetById), new { id = newPropertyImage.Id }, newPropertyImage);
     }
 
     [HttpPut("{id}")]

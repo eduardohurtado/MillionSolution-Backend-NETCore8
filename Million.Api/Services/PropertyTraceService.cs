@@ -13,7 +13,7 @@ public class PropertyTraceService
     public Task<PropertyTraceDto?> GetByIdAsync(string id, CancellationToken ct = default)
         => _repo.GetByIdAsync(id, ct);
 
-    public Task AddAsync(PropertyTraceDto dto, CancellationToken ct = default)
+    public async Task<PropertyTrace> AddAsync(PropertyTraceDto dto, CancellationToken ct = default)
     {
         var entity = new PropertyTrace
         {
@@ -23,7 +23,18 @@ public class PropertyTraceService
             Tax = dto.Tax,
             IdProperty = dto.IdProperty
         };
-        return _repo.AddAsync(entity, ct);
+
+        await _repo.AddAsync(entity, ct);
+
+        return new PropertyTrace
+        {
+            Id = entity.Id,
+            DateSale = entity.DateSale,
+            Name = entity.Name,
+            Value = entity.Value,
+            Tax = entity.Tax,
+            IdProperty = entity.IdProperty
+        };
     }
 
     public Task<bool> UpdateAsync(string id, PropertyTraceDto dto, CancellationToken ct = default)
