@@ -13,7 +13,7 @@ public class PropertyService
     public Task<PropertyDto?> GetByIdAsync(string id, CancellationToken ct = default)
         => _repo.GetByIdAsync(id, ct);
 
-    public Task AddAsync(PropertyDto dto, CancellationToken ct = default)
+    public async Task<PropertyDto> AddAsync(PropertyDto dto, CancellationToken ct = default)
     {
         var entity = new Property
         {
@@ -24,8 +24,22 @@ public class PropertyService
             Year = dto.Year,
             IdOwner = dto.IdOwner
         };
-        return _repo.AddAsync(entity, ct);
+
+        await _repo.AddAsync(entity, ct);
+
+        // Return the entity with ID assigned by Mongo
+        return new PropertyDto
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Address = entity.Address,
+            Price = entity.Price,
+            CodeInternal = entity.CodeInternal,
+            Year = entity.Year,
+            IdOwner = entity.IdOwner
+        };
     }
+
 
     public Task<bool> UpdateAsync(string id, PropertyDto dto, CancellationToken ct = default)
     {

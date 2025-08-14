@@ -13,7 +13,7 @@ public class OwnerService
     public Task<OwnerDto?> GetByIdAsync(string id, CancellationToken ct = default)
         => _repo.GetByIdAsync(id, ct);
 
-    public Task AddAsync(OwnerDto dto, CancellationToken ct = default)
+    public async Task<OwnerDto> AddAsync(OwnerDto dto, CancellationToken ct = default)
     {
         var entity = new Owner
         {
@@ -22,7 +22,18 @@ public class OwnerService
             Photo = dto.Photo,
             Birthday = dto.Birthday
         };
-        return _repo.AddAsync(entity, ct);
+
+        await _repo.AddAsync(entity, ct);
+
+        // Return the entity with ID assigned by Mongo
+        return new OwnerDto
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Address = entity.Address,
+            Photo = entity.Photo,
+            Birthday = entity.Birthday
+        };
     }
 
     public Task<bool> UpdateAsync(string id, OwnerDto dto, CancellationToken ct = default)

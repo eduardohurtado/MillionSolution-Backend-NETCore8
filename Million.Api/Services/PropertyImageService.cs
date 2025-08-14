@@ -10,8 +10,19 @@ public class PropertyImageService
     public Task<PropertyImageDto?> GetByIdAsync(string id, CancellationToken ct = default)
         => _repo.GetByIdAsync(id, ct);
 
-    public Task AddAsync(PropertyImage image, CancellationToken ct = default)
-        => _repo.AddAsync(image, ct);
+    public async Task<PropertyImageDto> AddAsync(PropertyImage image, CancellationToken ct = default)
+    {
+        await _repo.AddAsync(image, ct);
+
+        // Return the entity with ID assigned by Mongo
+        return new PropertyImageDto
+        {
+            Id = image.Id,
+            IdProperty = image.IdProperty,
+            File = image.File,
+            Enabled = image.Enabled
+        };
+    }
 
     public Task<bool> UpdateAsync(string id, PropertyImage image, CancellationToken ct = default)
         => _repo.UpdateAsync(id, image, ct);

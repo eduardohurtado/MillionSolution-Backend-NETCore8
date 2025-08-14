@@ -31,8 +31,8 @@ public class OwnersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] OwnerDto dto)
     {
-        await _service.AddAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+        var newOwner = await _service.AddAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = newOwner.Id }, newOwner);
     }
 
     [HttpPut("{id}")]
